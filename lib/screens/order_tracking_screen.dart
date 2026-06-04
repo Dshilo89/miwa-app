@@ -1,0 +1,15 @@
+import 'package:flutter/material.dart';
+
+/// Order tracking screen
+class OrderTrackingScreen extends StatelessWidget {
+  final String orderId;
+  const OrderTrackingScreen({super.key, required this.orderId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Track Order')),
+      body: Center(child: Text('Tracking Order $orderId')),
+    );
+  }
+}
