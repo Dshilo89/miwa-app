@@ -84,6 +84,25 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Sign in anonymously / Continue as Guest
+  Future<bool> signInAnonymously() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _user = await _authRepo.signInAnonymously();
+      _isLoading = false;
+      notifyListeners();
+      return _user != null;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Sign in with Google
   Future<bool> signInWithGoogle() async {
     _isLoading = true;

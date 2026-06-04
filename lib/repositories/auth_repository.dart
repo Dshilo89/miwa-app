@@ -72,6 +72,51 @@ class AuthRepository {
     }
   }
 
+  /// Sign in anonymously / Continue as Guest
+  Future<UserModel?> signInAnonymously() async {
+    try {
+      final userCredential = await _firebase.auth.signInAnonymously();
+      final user = userCredential.user;
+      if (user == null) return null;
+
+      // Check if user exists
+      final existingUser = await getUserById(user.uid);
+      if (existingUser != null) return existingUser;
+
+      // Create new guest user
+      final userModel = UserModel(
+        id: user.uid,
+        email: 'guest_${user.uid.substring(0, 6)}@miwa.app',
+        phone: '',
+        fullName: 'Guest User',
+        role: 'customer',
+        referralCode: AppUtils.generateReferralCode('Guest'),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await _firebase.setDocument(AppConstants.usersCollection, user.uid, userModel.toMap());
+
+      // Create wallet
+      await _firebase.setDocument(
+        AppConstants.walletsCollection,
+        user.uid,
+        {
+          'userId': user.uid,
+          'balance': 0.0,
+          'pendingBalance': 0.0,
+          'loyaltyPoints': 0,
+          'createdAt': DateTime.now(),
+          'updatedAt': DateTime.now(),
+        },
+      );
+
+      return userModel;
+    } catch (e) {
+      throw Exception('Guest sign in failed: $e');
+    }
+  }
+
   /// Sign in with Google
   Future<UserModel?> signInWithGoogle() async {
     try {
